@@ -1,0 +1,78 @@
+
+def show_cart(request):
+    user = request.user
+    cart_items = Cart.objects.filter(user=user)
+    
+    products = cart_items.filter(product__isnull=False)  # All product items
+    plastic_items = cart_items.filter(plastic_item__isnull=False)  # All plastic items
+    
+    total_amount = sum(item.product.discounted_price * item.quantity for item in products)
+    total_supercoins = sum(item.total_supercoins for item in plastic_items)
+    
+    context = {
+        'products': products,
+        'plastic_items': plastic_items,
+        'total_amount': total_amount,
+        'total_supercoins': total_supercoins,
+    }
+    
+    return render(request, 'app/addtocart.html', context)
+
+
+    <!--{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}
+Plastic Product Detail
+{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">{{ plastic_item.get_type_display }}</h2>
+    <div class="row">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <img src="{{ plastic_item.plastic_image.url }}" alt="{{ plastic_item.get_type_display }}" class="img-fluid rounded">
+        </div>
+        <div class="col-lg-6">
+            <h3 class="mb-3">{{ plastic_item.get_type_display }}</h3>
+            <p><strong>Basic Quantity:</strong> {{ plastic_item.basic_quantity }} grams</p>
+            <p><strong>Supercoins:</strong> {{ plastic_item.supercoins_for_basic_quantity }}</p>
+            <div class="mt-4">
+                <form action="{% url 'add_to_cart' %}" method="GET" class="d-inline">
+                    <input type="hidden" name="plastic_id" value="{{ plastic_item.id }}">
+                    <button type="submit" class="btn btn-warning shadow px-5 py-2 ms-4">Add to Cart</button>
+                </form>
+                
+                <a href="{% url 'add_to_cart' %}" class="btn btn-success btn-lg ms-3">Buy Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .img-fluid {
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+    .container {
+        max-width: 900px;
+    }
+</style>
+{% endblock main-content %}-->

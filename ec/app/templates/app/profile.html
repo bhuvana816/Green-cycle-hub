@@ -1,0 +1,75 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block title %}
+Profile
+{% endblock title %}
+{% block main-content %}
+
+<!-- Non-field errors -->
+{% if form.non_field_errors %}
+<div class="alert alert-danger mt-3">
+    {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Success/Warning messages -->
+{% if messages %}
+{% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} mt-3" role="alert">
+        {{ msg }}
+    </div>
+{% endfor %}
+{% endif %}
+
+<div class="container my-3">
+    <div class="row">
+        <h3 class="text-center mb-3">Welcome, <span class="text-capitalize">{{ request.user }}</span></h3>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar navigation -->
+        <div class="col-md-3 col-sm-12 mb-3">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-primary w-100">Profile</a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a href="{% url 'address' %}" class="btn btn-outline-secondary w-100">Address</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile form -->
+        <div class="col-md-8 col-sm-12">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h4 class="mb-4">Update Profile Information</h4>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {% for fm in form %}
+                            <div class="mb-3">
+                                {{ fm.label_tag }} 
+                                {{ fm }} 
+                                <small class="text-danger">{{ fm.errors|striptags }}</small>
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                        </div>
+
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock main-content %}

@@ -1,0 +1,79 @@
+{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}Plastic Category{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">{{ title.0.type|default:"Plastic Items" }}</h2>
+    <div class="row justify-content-center">
+        {% for item in plastic_items %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <!-- Updated href to point to the plastic product detail view -->
+            <a href="{% url 'plasticproductdetail' item.id %}" class="card-link">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-image-container">
+                        <img src="{{ item.plastic_image.url }}" class="card-img-top" alt="{{ item.get_type_display }}" loading="lazy">
+                    </div>
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title flex-grow-1">{{ item.get_type_display }}</h5>
+                        <div class="card-text">
+                            <p class="mb-1"><strong>Basic Quantity:</strong> {{ item.basic_quantity }} grams</p>
+                            <p class="mb-0"><strong>Supercoins:</strong> {{ item.supercoins_for_basic_quantity }}</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .card-link {
+        display: block;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-link:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    .card-image-container {
+        height: 200px;
+        overflow: hidden;
+        border-radius: 15px 15px 0 0;
+    }
+    .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .card-title {
+        color: #2d6a4f;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    .card-text {
+        color: #555;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    @media (max-width: 576px) {
+        .card-image-container {
+            height: 180px;
+        }
+    }
+</style>
+{% endblock main-content %}

@@ -1,0 +1,37 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block title %}
+Home
+{% endblock title %}
+
+{% block banner_slider %}
+<!-- Carousel -->
+<div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{% static 'app/images/banner/b1.avif' %}" class="d-block w-100" alt="GreenCycleHub Banner" style="max-height: 600px; object-fit: cover;">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+{% endblock banner_slider %}
+
+{% block main-content %}
+<!-- Main content section -->
+<section class="container text-center mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="display-5">Welcome to GreenCycleHub</h2>
+            <p class="lead">Contribute your plastic waste and earn exciting rewards! Help us make the world a cleaner place by recycling, reusing, and supporting sustainability.</p>
+            <a href="#" class="btn btn-lg btn-outline-success">Contribute Plastic</a>
+        </div>
+    </div>
+</section>
+{% endblock main-content %}

@@ -1,0 +1,206 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}
+    Cart
+{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <div class="row">
+        {% if products or plastic_items %}
+            <h1 class="text-center mb-5">Shopping Cart</h1>
+            
+            <div class="col-sm-8">
+                <!-- Product Section -->
+                {% if products %}
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            <h3>Products</h3>
+                            {% for item in products %}
+                                <div class="row mb-3">
+                                    <div class="col-sm-3 text-center align-self-center">
+                                        <img src="{{ item.product.product_image.url }}" alt="{{ item.product.title }}" class="img-fluid img-thumbnail shadow-sm" height="150" width="150">
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <h5>{{ item.product.title }}</h5>
+                                        <p class="mb-2 text-muted small">{{ item.product.description }}</p>
+                                        <div class="my-3">
+                                            <label for="quantity">Quantity</label>
+                                            <a class="minus-cart btn" data-id="{{ item.id }}"><i class="fas fa-minus-square fa-lg"></i></a>
+                                            <span id="quantity">{{ item.quantity }}</span>
+                                            <a class="plus-cart btn" data-id="{{ item.id }}"><i class="fas fa-plus-square fa-lg"></i></a>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <a href="#" class="remove-cart btn btn-sm btn-secondary mr-3" data-id="{{ item.id }}">Remove item</a>
+                                            <p class="mb-0"><strong>Rs. {{ item.total_cost }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="text-muted">
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Plastic Item Section -->
+                {% if plastic_items %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Plastic Items</h3>
+                            {% for item in plastic_items %}
+                                <div class="row mb-3">
+                                    <div class="col-sm-3 text-center align-self-center">
+                                        <img src="{{ item.plastic_item.plastic_image.url }}" alt="{{ item.plastic_item.get_type_display }}" class="img-fluid img-thumbnail shadow-sm" height="150" width="150">
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <h5>{{ item.plastic_item.get_type_display }}</h5>
+                                        <p class="mb-2 text-muted small">Basic Quantity: {{ item.plastic_item.basic_quantity }} grams</p>
+                                        <div class="my-3">
+                                            <label for="quantity">Quantity</label>
+                                            <a class="minus-cart btn" data-id="{{ item.id }}"><i class="fas fa-minus-square fa-lg"></i></a>
+                                            <span id="quantity">{{ item.quantity }}</span>
+                                            <a class="plus-cart btn" data-id="{{ item.id }}"><i class="fas fa-plus-square fa-lg"></i></a>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <a href="#" class="remove-cart btn btn-sm btn-secondary mr-3" data-id="{{ item.id }}">Remove item</a>
+                                            <p class="mb-0"><strong>Supercoins: {{ item.total_supercoins }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="text-muted">
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Total Summary</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                Amount <span id="total_amount">Rs. {{ total_amount }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                Shipping <span>Rs. 00.0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Total</strong><small> (including GST)</small>
+                                </div>
+                                <span id="total_amount"><strong>Rs. {{ total_amount }}</strong></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Total Supercoins</strong>
+                                </div>
+                                <span id="total_supercoins"><strong>{{ total_supercoins }}</strong></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Final Amount (after Supercoins)</strong>
+                                </div>
+                                <span id="final_amount"><strong>Rs. {{ final_amount }}</strong></span>
+                            </li>
+                        </ul>
+                        <div class="d-grid">
+                            <a href="{% url 'checkout' %}" class="btn btn-primary">Place Order</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <h1 class="text-center mb-5">Cart is Empty</h1>
+        {% endif %}
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle + button click
+        document.querySelectorAll('.plus-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                updateCart(id, 1);
+            });
+        });
+
+        // Handle - button click
+        document.querySelectorAll('.minus-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                updateCart(id, -1);
+            });
+        });
+
+        // Handle Remove button click
+        document.querySelectorAll('.remove-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                removeCartItem(id);
+            });
+        });
+
+        function updateCart(id, quantityChange) {
+            fetch(`/cart/update/${id}/?quantity_change=${quantityChange}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartSummary(data);
+                } else {
+                    alert('Error updating cart');
+                }
+            });
+        }
+
+        function removeCartItem(id) {
+            fetch(`/cart/remove/${id}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartSummary(data);
+                } else {
+                    alert('Error removing item');
+                }
+            });
+        }
+
+        function updateCartSummary(data) {
+            document.getElementById('total_amount').innerText = `Rs. ${data.total_amount}`;
+            document.getElementById('total_supercoins').innerText = `${data.total_supercoins}`;
+            location.reload(); // Reload to reflect changes in cart items
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+
+{% endblock main-content %}

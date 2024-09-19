@@ -1,0 +1,226 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block title %}Checkout{% endblock title %}
+{% block main-content %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    .checkout-header {
+        margin-bottom: 20px;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        color: #333;
+    }
+
+    .checkout-header h1 {
+        font-size: 2.5em;
+        margin: 0;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    .col-md-6 {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        background-color: #fff;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-body h5 {
+        font-size: 1.25em;
+        color: #555;
+    }
+
+    .card-body p {
+        font-size: 1em;
+        color: #666;
+    }
+
+    .order-summary h4, .address-selection h4 {
+        font-size: 1.5em;
+        color: #444;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .total-amounts p {
+        font-size: 1.125em;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .total-amounts .fw-bold {
+        font-weight: 700;
+    }
+
+    .address-selection .form-check-label {
+        font-weight: 600;
+    }
+
+    .payment-button {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 1.125em;
+        border-radius: 5px;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004080;
+    }
+
+    .alert {
+        border-radius: 5px;
+        font-size: 1em;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+</style>
+
+<div class="container">
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-danger" role="alert">
+        {{ msg }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    
+    <div class="checkout-header">
+        <h1>Checkout</h1>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 order-summary">
+            <h4>Order Summary</h4>
+            
+            <!-- Displaying Product Items -->
+            <h5>Products</h5>
+            {% for item in products %}
+            <div class="card">
+                <div class="card-body">
+                    <h5>Product: {{item.product.title}}</h5>
+                    <p>Quantity: {{item.quantity}}</p>
+                    <p class="fw-bold">Price: Rs. {{item.product.discounted_price}}</p>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Displaying Plastic Items -->
+            <h5>Plastic Items</h5>
+            {% for item in plastic_items %}
+            <div class="card">
+                <div class="card-body">
+                    <h5>Plastic Item: {{item.plastic_item.type}}</h5>
+                    <p>Quantity: {{item.quantity}}</p>
+                    <p class="fw-bold">Supercoins Earned: {{item.total_supercoins}}</p>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Total Amounts -->
+            <div class="total-amounts">
+                <p class="fw-bold">Total Cost (Products): Rs. {{ total_amount }}</p>
+                <p class="fw-bold">Total Supercoins (Plastic Items): {{ total_supercoins }}</p>
+                <p class="fw-bold">Final Amount (After Supercoins): Rs. {{ final_amount }}</p>
+                <p class="fw-bold">Total with Shipping + Rs. {{ shipping_fee }} = Rs. {{ total_with_shipping }}</p>
+                <small>Terms and conditions:</small>
+            </div>
+        </div>
+        
+        <div class="col-md-6 address-selection">
+            <h4>Select Shipping Address</h4>
+            <form method="post" id="myform">
+                {% csrf_token %}
+                {% for ad in add %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5>{{ad.name}}</h5>
+                        <p>Mobile: {{ad.mobile}}</p>
+                        <p>{{ad.locality}} {{ad.city}} {{ad.state}} - {{ad.zipcode}}</p>
+                    </div>
+                </div>
+                <div class="form-check mt-2 mb-5">
+                    <input class="form-check-input" type="radio" name="custid" id="custadd{{forloop.counter}}" value="{{ad.id}}">
+                    <label class="form-check-label" for="custadd{{forloop.counter}}">
+                        Address: {{forloop.counter}}
+                    </label>
+                </div>
+                {% endfor %}
+                
+                <div class="form-check mb-3">
+                    <label for="total_with_shipping" class="form-label">Total Amount</label>
+                    <input type="number" class="form-control" name="total_with_shipping" value="{{ total_with_shipping }}" readonly>
+                </div>
+                
+                <div class="payment-button">
+                    <button id="rzp-button1" type="submit" class="btn btn-primary">Proceed to Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main-content %}
+
+{% block payment-gateway %}
+<script>
+    var options = {
+        "key": "",  // Your Razorpay API Key
+        "amount": "{{ razoramount }}",
+        "currency": "INR",
+        "name": "Mavericks",
+        "description": "Purchase Product",
+        "order_id": "{{ order_id }}",
+        "handler": function(response) {
+            console.log("Payment successful");
+            var form = document.getElementById("myform");
+            window.location.href = "";  // Redirect URL after successful payment
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function(response) {
+        alert(response.error.description);
+    });
+    document.getElementById('rzp-button1').onclick = function(e) {
+        console.log("Button clicked");
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+{% endblock payment-gateway %}
